@@ -67,9 +67,9 @@ def preprocess_test(df):
 
 
 def create_files(train_df, test_df, csv_names): 
-    print("Creating files")
-    # Create Train and validation full files
-    X_train, X_val, y_train, y_val = train_test_split(train_df["tokens"], train_df["label"], test_size=0.05, random_state=42, stratify=train_df["label"])
+    print("Creating Train and validation files")
+    # Create Train and validation files
+    X_train, X_val, y_train, y_val = train_test_split(train_df["tokens"], train_df["label"], test_size=0.075, random_state=42, stratify=train_df["label"])
     train_norm = pd.concat([y_train,X_train], axis=1)
     val_norm = pd.concat([y_val,X_val], axis=1)
     
@@ -79,12 +79,12 @@ def create_files(train_df, test_df, csv_names):
     
     # Test set file
     if test_df is not None:
-        print("Processing Test file")
+        print("Creating Test file")
         test_df["tokens"].to_csv(csv_names["test"],index=False,header=False,line_terminator='\n')
         test_df["language"].to_csv(normalized_language_files["mapping"]["test"],index=False,header=False,line_terminator='\n')
         
 
-def create_language_files(train_df, test_df, csv_names):
+def create_language_df(train_df, test_df, csv_names):
     spanish_train = train_df[train_df["language"] == 'spanish']
     spanish_test = test_df[test_df["language"] == 'spanish']
     create_files(spanish_train, spanish_test, csv_names['spanish'])
@@ -94,37 +94,44 @@ def create_language_files(train_df, test_df, csv_names):
     create_files(portuguese_train, portuguese_test, csv_names["portuguese"])
 
     
-def create_reliable_files(train_df, csv_names):
+def create_reliable_df(train_df, csv_names):
     rlabel = train_df[train_df["label_quality"] == 'reliable']
-    urlabel = train_df[train_df["label_quality"] == 'unreliable'].sample(n=1184245, random_state=42)
+    samples = rlabel.shape[0] * 1.5
+    urlabel = train_df[train_df["label_quality"] == 'unreliable'].sample(n=samples, random_state=42)
     data_reliable = pd.concat([rlabel,urlabel])
     create_files(data_reliable, None, csv_names)
 
     
 def prepare_data():
-    print("Preparing data")
     # Load Dataset
+    print("Loading datasets")
     data_train = pd.read_csv(data_files['train'])
     data_test = pd.read_csv(data_files['test'])
-
+    print("Train and test datasets loaded")
+    
     # Preprocess data
+    print("Processing train dataset")
     train = parallelize_dataframe(data_train, preprocess)
+    print("Processing test dataset")
     test = parallelize_dataframe(data_test, preprocess_test)
 
     # Create full splits
+    print("Creating full csv files")
     create_files(train, test, normalized_files)
 
     # Create train, val and test by language
-    create_language_files(train, test, normalized_language_files)
+    print("Creating csv files for language specific models")
+    create_language_df(train, test, normalized_language_files)
 
     # Create df with reliable labels oversampling
-    create_reliable_files(train, normalized_reliable_files)
+    print("Creating csv files for oversampled reliable examples")
+    create_reliable_df(train, normalized_reliable_files)
 
     
-def train_models(ncpu=8):
+def train_models():
     for key, value in models.items():
         print("training model:", key)
-        output = fasttext.train_supervised(input=value["file"], epoch=value["epoch"], lr=value["lr"],wordNgrams=value["wordNgrams"], dim=value["dim"],thread=ncpu)
+        output = fasttext.train_supervised(input=value["file"], epoch=value["epoch"], lr=value["lr"],wordNgrams=value["wordNgrams"], dim=value["dim"],thread=n_cpus)
         output.save_model(model_files[key])
         print("model", key, "saved")
 
@@ -144,7 +151,7 @@ def run_model_on_test(model_file):
         test_language = pd.concat([test_data,language_mapping['language']],axis=1)
         model_sp = fasttext.load_model(model_file["spanish"])
         model_pt = fasttext.load_model(model_file["portuguese"])
-        print("Running predict on val set...")
+        print("Running predict on test set...")
         for index, row in test_language.iterrows():
             if row["language"] == 'spanish':
                 category = model_sp.predict(row["title"])[0][0]
@@ -152,7 +159,7 @@ def run_model_on_test(model_file):
                 category = model_pt.predict(row["title"])[0][0]
             predictions.append(category[9:])
         print("Predict finished for model bilingual")
-        return pd.Series(predictions, name='bilingual')
+        return pd.Series(predictions, name="bilingual")
     else:            
         model = fasttext.load_model(model_file)
         print("Running predict on test set...")
@@ -169,8 +176,8 @@ def count_votes(results_df):
     voted_results_df = pd.DataFrame.from_dict(voted_results)
     return voted_results_df
 
-def parallel_test_predict(n_cores=5):
-    results = Parallel(n_jobs=n_cores)(delayed(run_model_on_test)(model) for name, model in models_for_predict.items())
+def parallel_test_predict():
+    results = Parallel(n_jobs=n_cpus)(delayed(run_model_on_test)(model) for name, model in models_for_predict.items())
     return results
 
 def voting_ensemble_predict():
@@ -178,7 +185,7 @@ def voting_ensemble_predict():
     base_classifiers_results = pd.concat([x for x in results], axis=1)
     voted_results = parallelize_dataframe(base_classifiers_results, count_votes)
 
-    return base_classifiers_results, voted_results["id","category"]
+    return base_classifiers_results, voted_results[["id","category"]]
 
 
     

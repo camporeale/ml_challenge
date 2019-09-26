@@ -1,12 +1,17 @@
 from multiprocessing import  Pool
 from utils import prepare_data, train_models, make_validation_predictions
 from projectconfig import n_cpus, submission_file
+import datetime
+
+start = datetime.datetime.now()
 
 # Preprocessing data and creating files
-#prepare_data()
+print("################","Preparing data", "################", sep="\n")
+prepare_data()
           
 # Training all models
-train_models(n_cpus)
+print("################","Training Models", "################", sep="\n")
+train_models()
 
 # Make training predictions dataset
 # make_validation_predictions(models)
@@ -19,3 +24,6 @@ train_models(n_cpus)
 
 # creating submission file
 #make_submission(submission_file)
+
+end = datetime.datetime.now()
+print("Total time: ", end-start)
