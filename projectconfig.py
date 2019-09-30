@@ -36,43 +36,28 @@ normalized_reliable_files = {
 # Model files
 models = {
           "model_full_2gram": {"file": normalized_files["train"], "epoch": 5, "lr":0.5, "wordNgrams":2, "dim":100},
-          #"model_full_3gram": {"file": normalized_files["train"], "epoch": 5, "lr":0.5, "wordNgrams":3, "dim":200},
+          "model_full_3gram": {"file": normalized_files["train"], "epoch": 5, "lr":0.5, "wordNgrams":3, "dim":200},
           "model_reliable_2gram": {"file": normalized_reliable_files["train"], "epoch": 5, "lr":0.5, "wordNgrams":2, "dim":200 },
-          #"model_reliable_3gram": {"file": normalized_reliable_files["train"], "epoch": 5, "lr":0.5, "wordNgrams":3, "dim":200},
+          "model_reliable_3gram": {"file": normalized_reliable_files["train"], "epoch": 5, "lr":0.5, "wordNgrams":3, "dim":200},
           "model_spanish_2gram": {"file": normalized_language_files["spanish"]["train"], "epoch": 5, "lr":0.5, "wordNgrams":2, "dim":200 },
-          "model_portuguese_2gram": {"file": normalized_language_files["portuguese"]["train"], "epoch": 5, "lr":0.5, "wordNgrams":2, "dim":200 }
-        ,
-         # "model_spanish_3gram": {"file": normalized_language_files["spanish"]["train"], "epoch": 5, "lr":0.5, "wordNgrams":3, "dim":200 },
-         # "model_portuguese_3gram": {"file": normalized_language_files["portuguese"]["train"], "epoch": 5, "lr":0.5, "wordNgrams":3, "dim":200 }
+          "model_portuguese_2gram": {"file": normalized_language_files["portuguese"]["train"], "epoch": 5, "lr":0.5, "wordNgrams":2, "dim":200 },
+          "model_spanish_3gram": {"file": normalized_language_files["spanish"]["train"], "epoch": 5, "lr":0.5, "wordNgrams":3, "dim":200 },
+          "model_portuguese_3gram": {"file": normalized_language_files["portuguese"]["train"], "epoch": 5, "lr":0.5, "wordNgrams":3, "dim":200 }
         }
 
 model_files = {
                "model_full_2gram":base_model_dir + "model_full_2gram",
-              # "model_full_3gram":base_model_dir + "model_full_3gram",
+               "model_full_3gram":base_model_dir + "model_full_3gram",
                "model_reliable_2gram":base_model_dir + "model_reliable_2gram",
-               #"model_reliable_3gram":base_model_dir + "model_reliable_3gram", 
+               "model_reliable_3gram":base_model_dir + "model_reliable_3gram", 
                "model_spanish_2gram":base_model_dir + "model_spanish_2gram", 
-               "model_portuguese_2gram":base_model_dir + "model_portuguese_2gram"
-                #,
-              # "model_spanish_3gram":base_model_dir + "model_spanish_3gram", 
-              # "model_portuguese_3gram":base_model_dir + "model_portuguese_3gram"
+               "model_portuguese_2gram":base_model_dir + "model_portuguese_2gram",
+               "model_spanish_3gram":base_model_dir + "model_spanish_3gram", 
+               "model_portuguese_3gram":base_model_dir + "model_portuguese_3gram"
               }
-"""
-models_for_predict = {
-               "model_full_2gram":model_files["model_full_2gram"],
-              # "model_full_3gram":model_files["model_full_3gram"],
-               "model_reliable_2gram":model_files["model_reliable_2gram"],
-              # "model_reliable_3gram":model_files["model_reliable_3gram"],
-               "model_bilingual_2gram": {"spanish":model_files["model_spanish_2gram"], 
-                                    "portuguese":model_files["model_portuguese_2gram"]}
-    # ,
-              #  "model_bilingual_3gram": {"spanish":model_files["model_spanish_3gram"], 
-              #                     "portuguese":model_files["model_portuguese_3gram"]}
-              }
-"""
 
 models_for_predict = {
-               "model_pretrained":"/backups/models/model_test_pretrained.bin",
+               "model_full_300":"/home/franco_camporeale/models/model_full_300.bin",
                "model_full_100":"/home/franco_camporeale/models/model_full_100.bin",
                "model_reliable_2gram":"/backups/models/model_reliable_2gram",
                "model_reliable_3gram":"/backups/models/model_reliable_3gram",

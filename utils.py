@@ -135,11 +135,12 @@ def train_models():
         output.save_model(model_files[key])
         print("model", key, "saved")
 
+
 def make_validation_predictions():
     for model in models:
         print("validating")
         
-
+    
 def run_model_on_test(model_file):
     test_data = pd.read_csv(normalized_files["test"],header=None,names=['title'])
     
